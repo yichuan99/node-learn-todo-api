@@ -71,23 +71,26 @@ app.delete("/todos/:id", (req, res) => {
 });
 
 app.patch("/todos/:id", (req, res) => {
+	// extract useful components from the request
 	var id = req.params.id;
 	var body = _.pick(req.body, ["text", "completed"]);
 	if(!ObjectID.isValid(id)){
 		res.status(404).send("ID not valid: " + id);
 	}
 
+	// modify the copy of request body accordingly
 	if(_.isBoolean(body.completed) && body.completed){
 		body.completed_at = new Date().getTime();
 	}else{
 		body.completed = false;
 		body.completed_at = null;
 	}
-
+	console.log(body);
 	Todo.findByIdAndUpdate(id, {$set: body}, {new: true}).then((todo) => {
 		if(!todo){
 			return res.status(404).send();
 		}
+		console.log(todo);
 		res.send({todo});
 	}).catch((e) => {
 		res.status(400).send();

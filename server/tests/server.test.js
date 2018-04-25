@@ -11,7 +11,9 @@ const todos = [{
 	text: "First test to do"
 },{
 	_id: new ObjectID(),
-	text: "Second test to do"
+	text: "Second test to do",
+	completed: true,
+	completed_at: 2345
 }];
 
 // make sure the db is empty
@@ -141,4 +143,61 @@ describe("DELETE /todos/:id", () => {
 			.end(done);
 	});
 
+});
+
+describe("PATCH /todos/:id", () => {
+	it("should update todo to complete", (done) => {
+		var hex_id_0 = todos[0]._id.toHexString();
+		var body = {
+			text: "test text",
+			completed: true
+		};
+		request(app)
+			.patch(`/todos/${hex_id_0}`)
+			.send(body)
+			.expect(200)
+			.expect((res) => {
+				expect(res.body.todo.completed).toBe(true);
+				expect(res.body.todo.text).toBe("test text");
+			})
+			.end((err, res) => {
+				if(err){ // check for any error in the above checks
+					return done(err);
+				}
+
+				// response is good, now verify it in database
+				Todo.findById(hex_id_0).then((todo) => {
+					expect(todo.completed).toBe(true);
+					expect(todo.text).toBe("test text");
+					done();
+				}).catch((err) => done(err));
+			});
+	});
+
+	it("should update from complete to incomplete", (done) => {
+		var hex_id_1 = todos[1]._id.toHexString();
+		var text = todos[1].text;
+		var body = {
+			completed: false
+		};
+		request(app)
+			.patch(`/todos/${hex_id_1}`)
+			.send(body)
+			.expect(200)
+			.expect((res) => {
+				expect(res.body.todo.completed).toBe(false);
+				expect(res.body.todo.text).toBe(text);
+			})
+			.end((err, res) => {
+				if(err){
+					return done(err);
+				}
+
+				Todo.findById(hex_id_1).then((todo) => {
+					expect(todo.completed).toBe(false);
+					expect(todo.text).toBe(text);
+					done();
+				}).catch((err) => done(err));
+			});
+	});
 });
