@@ -92,9 +92,6 @@ describe("GET /todos/:id", () => {
 		request(app)
 			.get(`/todos/${id.toHexString()}`)
 			.expect(404)
-			.expect((res) => {
-				expect(res.body.text).toBe("Todo not found");
-			})
 			.end(done);
 	});
 
