@@ -1,3 +1,5 @@
+require("./config./config");
+
 // global imports
 const _ = require("lodash");
 const express = require("express");
@@ -10,7 +12,7 @@ var {Todo} = require("./models/todo");
 var {User} = require("./models/user");
 
 var app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT;
 
 // middleware
 app.use(body_parser.json());
@@ -85,12 +87,10 @@ app.patch("/todos/:id", (req, res) => {
 		body.completed = false;
 		body.completed_at = null;
 	}
-	console.log(body);
 	Todo.findByIdAndUpdate(id, {$set: body}, {new: true}).then((todo) => {
 		if(!todo){
 			return res.status(404).send();
 		}
-		console.log(todo);
 		res.send({todo});
 	}).catch((e) => {
 		res.status(400).send();
