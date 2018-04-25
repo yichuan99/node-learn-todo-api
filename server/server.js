@@ -1,4 +1,4 @@
-require("./config./config");
+require("./config/config");
 
 // global imports
 const _ = require("lodash");
