@@ -97,6 +97,47 @@ app.patch("/todos/:id", (req, res) => {
 	});
 });
 
+// the app.post() works in background and get
+// all the HTTP stuff handled. It extracts the request
+// and pass down a response handler to send stuff back
+// the callback is about how to handle the req and send a res
+
+/*
+	app.listen(port, ()=>{"server started"})  -------> starts listening
+			|
+			v
+	app.post("/abc", callback){
+		extract the request content -> req
+		create a response object -> res
+		when finished, pass the case down to callback
+		callback(req, res)	
+	}
+			|
+			v
+	(req, res) => {  --> this is the call back to client
+		handle the request accordingly
+		use res object to send info back to client
+	}
+*/
+
+app.post("/users", (req, res) => {
+	var body = _.pick(req.body, ["email", "password"]);
+	var user = new User(body);
+
+	user.save().then(() => {
+		return user.generateAuthToken();
+	})
+	.then((token) => {
+		res.header("x-auth", token).send(user);
+	})
+	.catch((err) => {
+		res.status(400).send(err);
+	});
+});
+
+
+
+// Event Listener
 app.listen(port, () => {
 	console.log(`Started on port ${port}`);
 });
