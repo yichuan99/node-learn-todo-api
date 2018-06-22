@@ -17,9 +17,14 @@ var token2 = jwt.sign(data2, salt);
 // is encoded in hashing, which will never be found out
 // the purpose of hashing is actually to protect the salt
 
-// the hash jwt on server side is a lock, and the user is issued a unique key
-// nobody can create key since no one knows how it's created (they need correct 
+
+// the hash jwt on server side is a lock, and the user is issued a unique key (salted-hash token)
+// nobody can create key that represents someone else since no one knows how it's created (they need correct 
 // salt, which is hashed and impossible to find out by user since one-way hashing)
+
+// User can only use their own issued key to convince the server about their identity
+// Any attemp to create key to pretend to be other user will fail since the user doesn't
+// know the salt, which is stored on the server. 
 var decoded = jwt.verify(token, salt);
 var decoded2 = jwt.verify(token2, salt);
 

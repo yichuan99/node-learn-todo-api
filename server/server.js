@@ -122,6 +122,11 @@ app.patch("/todos/:id", (req, res) => {
 
 app.post("/users", (req, res) => {
 	var body = _.pick(req.body, ["email", "password"]);
+
+	// debug print lines
+	// console.log("req.body", req.body);
+	// console.log("body: ", body);
+	
 	var user = new User(body);
 
 	user.save().then(() => {
@@ -136,6 +141,18 @@ app.post("/users", (req, res) => {
 });
 
 
+app.get("/users/me", (req, res) => {
+	var token = req.header("x-auth");	
+	
+	User.findByToken(token).then((user) => {
+		if(!user){
+
+		}
+
+		res.send(user);
+	});
+	
+});
 
 // Event Listener
 app.listen(port, () => {

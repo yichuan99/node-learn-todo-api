@@ -60,6 +60,28 @@ UserSchema.methods.generateAuthToken = function() {
 	});
 };
 
+// .statics makes the method a model (class) method instead of an instance method
+UserSchema.statics.findByToken = function (token) {
+	var User = this; // model method get called with the model of this binding
+	var decoded; // prepare for try-catch block
+	// use a try-catch block to handle jwt.verify() error cases
+	try{
+
+		decoded = jwt.verify(token ,"abc123");
+	}catch(err){
+		// if the token verification failed
+
+	}
+
+	// if the token is successfully decoded
+	// findOne will return a promise
+	return User.findOne({
+		"_id": decoded._id,
+		"tokens.token": token,
+		"tokens.access": "auth"
+	});
+};
+
 var User = mongoose.model("User", UserSchema);
 
 module.exports = {User};
