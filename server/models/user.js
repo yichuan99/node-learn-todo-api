@@ -83,6 +83,34 @@ UserSchema.statics.findByToken = function (token) {
 	});
 };
 
+// .statics makes the method a model (class) method instead of an instance method
+UserSchema.statics.findByEmail = function (email) {
+	var User = this; // model method get called with the model of this binding
+	return User.findOne({email});
+};
+
+UserSchema.statics.findByCredentials = function (email, password){
+	var User = this;
+	//debugger;
+	return User.findByEmail(email).then((user) => {
+		if(!user){
+			return Promise.reject();
+		}
+
+		return new Promise((resolve, reject) => {
+			// User bcrypt.compare to compare pasword and user.password
+			bcrypt.compare(password, user.password, (err, res) => {
+				if(res){
+					resolve(user);	
+	
+				}else{
+					reject();
+				}
+			});
+		});
+	});
+};	
+
 // do sth before we save the user. 
 UserSchema.pre("save", function(next){
 	var user = this;

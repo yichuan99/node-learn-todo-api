@@ -274,3 +274,78 @@ describe("POST /users", () => {
 			.end(done);
 	});
 });
+
+describe("POST /users/login", () => {
+	it("should login user and return auth token", (done) => {
+		request(app)
+		.post("/users/login")
+		.send(users[1])
+		.expect(200)
+		.expect((res) => {
+			expect(res.body.email).toBe(users[1].email);
+			expect(res.headers["x-auth"]).toExist();
+		}).end((err, res) => {
+			if(err){
+				return done(err);
+			}
+			//done();
+			// check that users[1] now has a token (it doesn't before this operation)
+			User.findById(users[1]._id).then((user) => {
+				expect(user.tokens[0]).toInclude({
+					access: "auth",
+					token: res.headers["x-auth"]
+				});
+				done();
+			}).catch((err) => done(err));
+		});
+	});
+
+	it("should reject invalid password", (done) => {
+		var email = users[1].email;
+		var password = users[1].password + "abc";
+
+		request(app)
+		.post("/users/login")
+		.send({email, password})
+		.expect(400)
+		.expect((res) => {
+			expect(res.headers["x-auth"]).toNotExist();
+		})
+		.end((err, res) => {
+			if(err){
+				return done(err);
+			}
+
+			// no token should have been generted
+			User.findById(users[1]._id).then((user) => {
+				expect(user.tokens.length).toBe(0);
+				done();
+			}).catch((err) => done(err));
+		});
+	});
+
+	it("should reject invalid email", (done) => {
+		var email = "abc" + users[1].email;
+		var password = users[1].password;
+
+		request(app)
+		.post("/users/login")
+		.send({email, password})
+		.expect(400)
+		.expect((res) => {
+			expect(res.headers["x-auth"]).toNotExist();
+		})
+		.end((err, res) => {
+			if(err){
+				return done(err);
+			}
+
+			// no token should have been generted
+			User.findById(users[1]._id).then((user) => {
+				expect(user.tokens.length).toBe(0);
+				done();
+			}).catch((err) => done(err));
+		});
+	});
+
+});
