@@ -61,6 +61,16 @@ UserSchema.methods.generateAuthToken = function() {
 	});
 };
 
+UserSchema.methods.removeToken = function(token){
+	var user = this;
+
+	return user.update({
+		$pull:{
+			tokens:{token}
+		}
+	});
+};
+
 // .statics makes the method a model (class) method instead of an instance method
 UserSchema.statics.findByToken = function (token) {
 	var User = this; // model method get called with the model of this binding
