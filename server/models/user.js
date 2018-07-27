@@ -47,7 +47,7 @@ UserSchema.methods.generateAuthToken = function() {
 	// create token according to the identity of this user
 	var user = this;
 	var access = "auth";
-	var token = jwt.sign({_id: user._id.toHexString(), access}, "abc123").toString();
+	var token = jwt.sign({_id: user._id.toHexString(), access}, process.env.JWT_SECRET).toString();
 	
 	// give the generate token to user
 	user.tokens = user.tokens.concat([{access, token}]);
@@ -78,7 +78,7 @@ UserSchema.statics.findByToken = function (token) {
 	// use a try-catch block to handle jwt.verify() error cases
 	try{
 
-		decoded = jwt.verify(token ,"abc123");
+		decoded = jwt.verify(token, process.env.JWT_SECRET);
 	}catch(err){
 		// if the token verification failed
 		return Promise.reject();
