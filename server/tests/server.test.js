@@ -126,7 +126,7 @@ describe("DELETE /todos/:id", () => {
 					return done(err);
 				// make sure the item is indeed deleted
 				Todo.findById(hex_id).then((todo) => {
-					expect(todo).toNotExist();
+					expect(todo).toBeFalsy();
 					done();
 				}).catch((err) => done(err));
 			});
@@ -144,7 +144,7 @@ describe("DELETE /todos/:id", () => {
 					return done(err);
 				// make sure the item is indeed deleted
 				Todo.findById(hex_id).then((todo) => {
-					expect(todo).toExist(); // the deletion should not happen
+					expect(todo).toBeTruthy(); // the deletion should not happen
 					done();
 				}).catch((err) => done(err));
 			});
@@ -185,6 +185,7 @@ describe("PATCH /todos/:id", () => {
 			.expect((res) => {
 				expect(res.body.todo.completed).toBe(true);
 				expect(res.body.todo.text).toBe("test text");
+				expect(typeof res.body.todo.completed_at).toBe("number");
 			})
 			.end((err, res) => {
 				if(err){ // check for any error in the above checks
@@ -289,8 +290,8 @@ describe("POST /users", () => {
 			.send(user)
 			.expect(200)			// check for status code
 			.expect((res) => {
-				expect(res.headers["x-auth"]).toExist(); // we don't really care what it is, we just care if it exists when the user is created
-				expect(res.body._id).toExist();// we don't really care what it is, we just care if it exists when the user is created
+				expect(res.headers["x-auth"]).toBeTruthy(); // we don't really care what it is, we just care if it exists when the user is created
+				expect(res.body._id).toBeTruthy();// we don't really care what it is, we just care if it exists when the user is created
 				expect(res.body.email).toBe(email); // check for response content
 			})
 			.end((err, res) => {
@@ -298,9 +299,9 @@ describe("POST /users", () => {
 					return done(err);
 				}							
 				User.findOne({email}).then((user) => {
-					expect(user).toExist();
+					expect(user).toBeTruthy();
 					expect(user.email).toBe(email);
-					expect(user.password).toNotBe(password); // our password should have been hashed, so it shouldn't equal
+					expect(user.password).not.toBe(password); // our password should have been hashed, so it shouldn't equal
 					done();
 				}).catch((err) => done(err));
 			});
@@ -347,7 +348,7 @@ describe("POST /users/login", () => {
 		.expect(200)
 		.expect((res) => {
 			expect(res.body.email).toBe(users[1].email);
-			expect(res.headers["x-auth"]).toExist();
+			expect(res.headers["x-auth"]).toBeTruthy();
 		}).end((err, res) => {
 			if(err){
 				return done(err);
@@ -355,7 +356,7 @@ describe("POST /users/login", () => {
 			//done();
 			// check that users[1] now has a token (it doesn't before this operation)
 			User.findById(users[1]._id).then((user) => {
-				expect(user.tokens[1]).toInclude({
+				expect(user.toObject().tokens[1]).toMatchObject({
 					access: "auth",
 					token: res.headers["x-auth"]
 				});
@@ -373,7 +374,7 @@ describe("POST /users/login", () => {
 		.send({email, password})
 		.expect(400)
 		.expect((res) => {
-			expect(res.headers["x-auth"]).toNotExist();
+			expect(res.headers["x-auth"]).toBeFalsy();
 		})
 		.end((err, res) => {
 			if(err){
@@ -397,7 +398,7 @@ describe("POST /users/login", () => {
 		.send({email, password})
 		.expect(400)
 		.expect((res) => {
-			expect(res.headers["x-auth"]).toNotExist();
+			expect(res.headers["x-auth"]).toBeFalsy();
 		})
 		.end((err, res) => {
 			if(err){
